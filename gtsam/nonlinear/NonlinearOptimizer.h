@@ -108,9 +108,9 @@ namespace gtsam
       return values();
     }
 
-    const Values &optimize(const gtsam::Key &key)
+    const Values &optimize(const KeyVector &keys)
     {
-      defaultOptimize(key);
+      defaultOptimize(keys);
       return values();
     }
 
@@ -160,7 +160,7 @@ namespace gtsam
      */
     void defaultOptimize();
 
-    void defaultOptimize(const gtsam::Key &key);
+    void defaultOptimize(const KeyVector &keys);
 
     virtual const NonlinearOptimizerParams &_params() const = 0;
 

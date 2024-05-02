@@ -278,7 +278,7 @@ namespace gtsam
   }
 
   /* ************************************************************************* */
-  void NonlinearOptimizer::defaultOptimize(const gtsam::Key &key)
+  void NonlinearOptimizer::defaultOptimize(const KeyVector &keys)
   {
     const NonlinearOptimizerParams &params = _params();
     double currentError = error();
@@ -309,14 +309,17 @@ namespace gtsam
 
     // Iterative loop
     double newError = currentError; // used to avoid repeated calls to error()
-    Pose3 prev_pose;
-    Pose3 new_pose = state_->values.at<Pose3>(key);
+
+    std::vector<Pose3> prev_pose_vec(keys.size());
+    for (int i = 0; i < keys.size(); i++)
+    {
+      prev_pose_vec[i] = state_->values.at<Pose3>(keys[i]);
+    }
 
     do
     {
       // Do next iteration
       currentError = newError;
-      prev_pose = new_pose;
 
       iterate();
       tictoc_finishedIteration();
@@ -324,16 +327,33 @@ namespace gtsam
       // Update newError for either printouts or conditional-end checks:
       newError = error();
 
-      std::cout << "iterations " << iterations() << "| newError: " << newError << " currentError: " << currentError << std::endl;
-      new_pose = state_->values.at<Pose3>(key);
-      const auto delta = new_pose.between(prev_pose);
-      Vector6 delta_vec = Pose3::Logmap(delta);
-      double rot_norm = delta_vec.head(3).norm();
-      double trans_norm = delta_vec.tail(3).norm();
-      // std::cout << "trans_norm: " << trans_norm << " rot_norm: " << rot_norm << std::endl;
-      if (rot_norm < 0.002 && trans_norm < 1e-2)
+      // std::cout << "iterations " << iterations() << "| newError: " << newError << " currentError: " << currentError << std::endl;
+
+      // initialize Vector6 delta_se3_sum all 0;
+      Vector6 delta_se3_sum = Vector6::Zero();
+      for (int i = 0; i < keys.size(); i++)
       {
-        std::cout << "converged by delta " << std::endl;
+        Pose3 new_pose = state_->values.at<Pose3>(keys[i]);
+        const auto delta = new_pose.between(prev_pose_vec[i]);
+        Vector6 delta_se3 = Pose3::Logmap(delta);
+
+        double temp_rot_norm = delta_se3.head(3).norm();
+        double temp_trans_norm = delta_se3.tail(3).norm();
+        // std::cout << "temp_trans_norm: " << temp_trans_norm << " temp_rot_norm: " << temp_rot_norm << std::endl;
+
+        delta_se3_sum += delta_se3;
+        // renew prev pose
+        prev_pose_vec[i] = new_pose;
+      }
+
+      delta_se3_sum = delta_se3_sum / keys.size();
+
+      double rot_norm = delta_se3_sum.head(3).norm();
+      double trans_norm = delta_se3_sum.tail(3).norm();
+      // std::cout << "trans_norm: " << trans_norm << " rot_norm: " << rot_norm << std::endl;
+      if (rot_norm < 0.001 && trans_norm < 0.01)
+      {
+        // std::cout << "converged by delta " << std::endl;
         break;
       }
 
