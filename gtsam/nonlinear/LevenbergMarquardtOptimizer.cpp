@@ -204,12 +204,14 @@ namespace gtsam
 
         // cost change in the original, nonlinear system (old - new)
         costChange = std::abs(currentState->error - newError);
+        // std::cout << "costChange = " << costChange << " threshold: " << std::numeric_limits<double>::epsilon() * oldLinearizedError << std::endl;
 
         if (linearizedCostChange > std::numeric_limits<double>::epsilon() * oldLinearizedError)
         {
           // the (linear) error has to decrease to satisfy this condition
           // fidelity of linearized model VS original system between
           modelFidelity = costChange / linearizedCostChange;
+          // std::cout << "modelFidelity: " << modelFidelity << "   params_.minModelFidelity" << params_.minModelFidelity << std::endl;
           // if we decrease the error in the nonlinear system and modelFidelity is above threshold
           step_is_successful = modelFidelity > params_.minModelFidelity;
           if (verbose)

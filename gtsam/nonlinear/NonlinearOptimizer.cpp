@@ -353,7 +353,6 @@ namespace gtsam
       // std::cout << "trans_norm: " << trans_norm << " rot_norm: " << rot_norm << std::endl;
       if (rot_norm < 0.001 && trans_norm < 0.01)
       {
-        // std::cout << "converged by delta " << std::endl;
         break;
       }
 

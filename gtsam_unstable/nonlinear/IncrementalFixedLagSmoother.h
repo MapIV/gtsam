@@ -90,6 +90,13 @@ public:
     return isam_.params();
   }
 
+      /** Access the current set of marginalizable variables */
+    KeyVector marginalizableKeys() const
+    {
+      return marginalizableKeys_;
+    }
+    
+
   /** Access the current set of factors */
   const NonlinearFactorGraph& getFactors() const {
     return isam_.getFactorsUnsafe();
@@ -124,6 +131,10 @@ protected:
     params.findUnusedFactorSlots = true;
     return params;
   }
+
+  /** marginalized keys */
+  KeyVector marginalizableKeys_;
+
 
   /** An iSAM2 object used to perform inference. The smoother lag is controlled
    * by what factors are removed each iteration */
