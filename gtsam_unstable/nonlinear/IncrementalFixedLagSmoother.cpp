@@ -90,6 +90,7 @@ FixedLagSmoother::Result IncrementalFixedLagSmoother::update(
   // Find the set of variables to be marginalized out
   KeyVector marginalizableKeys = findKeysBefore(
       current_timestamp - smootherLag_);
+  marginalizableKeys_ = marginalizableKeys;
 
   if (debug) {
     std::cout << "Marginalizable Keys: ";
