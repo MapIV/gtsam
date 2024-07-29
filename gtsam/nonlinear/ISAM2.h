@@ -62,8 +62,8 @@ class GTSAM_EXPORT ISAM2 : public BayesTree<ISAM2Clique> {
 
   mutable VectorValues deltaNewton_;  // Only used when using Dogleg - stores
                                       // the Gauss-Newton update
-  mutable VectorValues RgProd_;  // Only used when using Dogleg - stores R*g and
-                                 // is updated incrementally
+  mutable VectorValues RgProd_;       // Only used when using Dogleg - stores R*g and
+                                      // is updated incrementally
 
   /** A cumulative mask for the variables that were replaced and have not yet
    * been updated in the linear solution delta_, this is only used internally,
@@ -196,10 +196,9 @@ class GTSAM_EXPORT ISAM2 : public BayesTree<ISAM2Clique> {
    * graph indices of any factor that was removed during the 'marginalizeLeaves'
    * call
    */
-  void marginalizeLeaves(
-      const FastList<Key>& leafKeys,
-      boost::optional<FactorIndices&> marginalFactorsIndices = boost::none,
-      boost::optional<FactorIndices&> deletedFactorsIndices = boost::none);
+  void marginalizeLeaves(const FastList<Key>& leafKeys,
+                         boost::optional<FactorIndices&> marginalFactorsIndices = boost::none,
+                         boost::optional<FactorIndices&> deletedFactorsIndices = boost::none);
 
   /// Access the current linearization point
   const Values& getLinearizationPoint() const { return theta_; }
@@ -254,9 +253,7 @@ class GTSAM_EXPORT ISAM2 : public BayesTree<ISAM2Clique> {
   double error(const VectorValues& x) const;
 
   /** Access the set of nonlinear factors */
-  const NonlinearFactorGraph& getFactorsUnsafe() const {
-    return nonlinearFactors_;
-  }
+  const NonlinearFactorGraph& getFactorsUnsafe() const { return nonlinearFactors_; }
 
   /** Access the nonlinear variable index */
   const VariableIndex& getVariableIndex() const { return variableIndex_; }
@@ -283,17 +280,19 @@ class GTSAM_EXPORT ISAM2 : public BayesTree<ISAM2Clique> {
  protected:
   /// Remove marked top and either recalculate in batch or incrementally.
   void recalculate(const ISAM2UpdateParams& updateParams,
-                   const KeySet& relinKeys, ISAM2Result* result);
+                   const KeySet& relinKeys,
+                   ISAM2Result* result);
 
   // Do a batch step - reorder and relinearize all variables
   void recalculateBatch(const ISAM2UpdateParams& updateParams,
-                        KeySet* affectedKeysSet, ISAM2Result* result);
+                        KeySet* affectedKeysSet,
+                        ISAM2Result* result);
 
   // retrieve all factors that ONLY contain the affected variables
   // (note that the remaining stuff is summarized in the cached factors)
-  GaussianFactorGraph relinearizeAffectedFactors(
-      const ISAM2UpdateParams& updateParams, const FastList<Key>& affectedKeys,
-      const KeySet& relinKeys);
+  GaussianFactorGraph relinearizeAffectedFactors(const ISAM2UpdateParams& updateParams,
+                                                 const FastList<Key>& affectedKeys,
+                                                 const KeySet& relinKeys);
 
   /**
    * @brief Perform an incremental update of the factor graph to return a new
@@ -309,7 +308,8 @@ class GTSAM_EXPORT ISAM2 : public BayesTree<ISAM2Clique> {
   void recalculateIncremental(const ISAM2UpdateParams& updateParams,
                               const KeySet& relinKeys,
                               const FastList<Key>& affectedKeys,
-                              KeySet* affectedKeysSet, Cliques* orphans,
+                              KeySet* affectedKeysSet,
+                              Cliques* orphans,
                               ISAM2Result* result);
 
   /**
@@ -317,8 +317,7 @@ class GTSAM_EXPORT ISAM2 : public BayesTree<ISAM2Clique> {
    * @param newTheta Initial values for new variables
    * @param variableStatus optional detailed result structure
    */
-  void addVariables(const Values& newTheta,
-                    ISAM2Result::DetailedResults* detail = 0);
+  void addVariables(const Values& newTheta, ISAM2Result::DetailedResults* detail = 0);
 
   /**
    * Remove variables from the ISAM2 system.
@@ -330,20 +329,20 @@ class GTSAM_EXPORT ISAM2 : public BayesTree<ISAM2Clique> {
  private:
   /** Serialization function */
   friend class boost::serialization::access;
-  template<class ARCHIVE>
-  void serialize(ARCHIVE & ar, const unsigned int /*version*/) {
-      ar & boost::serialization::base_object<BayesTree<ISAM2Clique> >(*this);
-      ar & BOOST_SERIALIZATION_NVP(theta_);
-      ar & BOOST_SERIALIZATION_NVP(variableIndex_);
-      ar & BOOST_SERIALIZATION_NVP(delta_);
-      ar & BOOST_SERIALIZATION_NVP(deltaNewton_);
-      ar & BOOST_SERIALIZATION_NVP(RgProd_);
-      ar & BOOST_SERIALIZATION_NVP(deltaReplacedMask_);
-      ar & BOOST_SERIALIZATION_NVP(nonlinearFactors_);
-      ar & BOOST_SERIALIZATION_NVP(linearFactors_);
-      ar & BOOST_SERIALIZATION_NVP(doglegDelta_);
-      ar & BOOST_SERIALIZATION_NVP(fixedVariables_);
-      ar & BOOST_SERIALIZATION_NVP(update_count_);
+  template <class ARCHIVE>
+  void serialize(ARCHIVE& ar, const unsigned int /*version*/) {
+    ar& boost::serialization::base_object<BayesTree<ISAM2Clique> >(*this);
+    ar& BOOST_SERIALIZATION_NVP(theta_);
+    ar& BOOST_SERIALIZATION_NVP(variableIndex_);
+    ar& BOOST_SERIALIZATION_NVP(delta_);
+    ar& BOOST_SERIALIZATION_NVP(deltaNewton_);
+    ar& BOOST_SERIALIZATION_NVP(RgProd_);
+    ar& BOOST_SERIALIZATION_NVP(deltaReplacedMask_);
+    ar& BOOST_SERIALIZATION_NVP(nonlinearFactors_);
+    ar& BOOST_SERIALIZATION_NVP(linearFactors_);
+    ar& BOOST_SERIALIZATION_NVP(doglegDelta_);
+    ar& BOOST_SERIALIZATION_NVP(fixedVariables_);
+    ar& BOOST_SERIALIZATION_NVP(update_count_);
   }
 
 };  // ISAM2

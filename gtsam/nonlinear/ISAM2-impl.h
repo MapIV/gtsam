@@ -57,8 +57,7 @@ class ISAM2BayesTree : public ISAM2::Base {
 /* ************************************************************************* */
 // Special JunctionTree class that produces ISAM2 BayesTree cliques, used for
 // reeliminating ISAM2 subtrees.
-class ISAM2JunctionTree
-    : public JunctionTree<ISAM2BayesTree, GaussianFactorGraph> {
+class ISAM2JunctionTree : public JunctionTree<ISAM2BayesTree, GaussianFactorGraph> {
  public:
   typedef JunctionTree<ISAM2BayesTree, GaussianFactorGraph> Base;
   typedef ISAM2JunctionTree This;
@@ -118,8 +117,7 @@ struct GTSAM_EXPORT UpdateImpl {
       : params_(params), updateParams_(updateParams) {}
 
   // Provide some debugging information at the start of update
-  static void LogStartingUpdate(const NonlinearFactorGraph& newFactors,
-                                const ISAM2& isam2) {
+  static void LogStartingUpdate(const NonlinearFactorGraph& newFactors, const ISAM2& isam2) {
     gttic(pushBackFactors);
     const bool debug = ISDEBUG("ISAM2 update");
     const bool verbose = ISDEBUG("ISAM2 update verbose");
@@ -138,8 +136,7 @@ struct GTSAM_EXPORT UpdateImpl {
   // loop relinerization threshold.
   bool relinarizationNeeded(size_t update_count) const {
     return updateParams_.force_relinearize ||
-           (params_.enableRelinearization &&
-            update_count % params_.relinearizeSkip == 0);
+           (params_.enableRelinearization && update_count % params_.relinearizeSkip == 0);
   }
 
   // Add any new factors \Factors:=\Factors\cup\Factors'.
@@ -155,8 +152,7 @@ struct GTSAM_EXPORT UpdateImpl {
     // Adds them to the complete list of nonlinear factors, and populates the
     // list of new factor indices, both optionally finding and reusing empty
     // factor slots.
-    *newFactorsIndices = nonlinearFactors->add_factors(
-        newFactors, params_.findUnusedFactorSlots);
+    *newFactorsIndices = nonlinearFactors->add_factors(newFactors, params_.findUnusedFactorSlots);
 
     // Remove the removed factors
     NonlinearFactorGraph removedFactors;
@@ -184,18 +180,20 @@ struct GTSAM_EXPORT UpdateImpl {
     gttic(computeUnusedKeys);
     KeySet removedAndEmpty;
     for (Key key : keysWithRemovedFactors) {
-      if (variableIndex.empty(key))
-        removedAndEmpty.insert(removedAndEmpty.end(), key);
+      if (variableIndex.empty(key)) removedAndEmpty.insert(removedAndEmpty.end(), key);
     }
     KeySet newFactorSymbKeys = newFactors.keys();
-    std::set_difference(removedAndEmpty.begin(), removedAndEmpty.end(),
-                        newFactorSymbKeys.begin(), newFactorSymbKeys.end(),
+    std::set_difference(removedAndEmpty.begin(),
+                        removedAndEmpty.end(),
+                        newFactorSymbKeys.begin(),
+                        newFactorSymbKeys.end(),
                         std::inserter(*unusedKeys, unusedKeys->end()));
   }
 
   // Calculate nonlinear error
   void error(const NonlinearFactorGraph& nonlinearFactors,
-             const Values& estimate, boost::optional<double>* result) const {
+             const Values& estimate,
+             boost::optional<double>* result) const {
     gttic(error);
     result->reset(nonlinearFactors.error(estimate));
   }
@@ -208,8 +206,7 @@ struct GTSAM_EXPORT UpdateImpl {
     gttic(gatherInvolvedKeys);
     *markedKeys = newFactors.keys();  // Get keys from new factors
     // Also mark keys involved in removed factors
-    markedKeys->insert(keysWithRemovedFactors.begin(),
-                       keysWithRemovedFactors.end());
+    markedKeys->insert(keysWithRemovedFactors.begin(), keysWithRemovedFactors.end());
 
     // Also mark any provided extra re-eliminate keys
     if (updateParams_.extraReelimKeys) {
@@ -247,9 +244,10 @@ struct GTSAM_EXPORT UpdateImpl {
     }
   }
 
-  static void CheckRelinearizationRecursiveMap(
-      const FastMap<char, Vector>& thresholds, const VectorValues& delta,
-      const ISAM2::sharedClique& clique, KeySet* relinKeys) {
+  static void CheckRelinearizationRecursiveMap(const FastMap<char, Vector>& thresholds,
+                                               const VectorValues& delta,
+                                               const ISAM2::sharedClique& clique,
+                                               KeySet* relinKeys) {
     // Check the current clique for relinearization
     bool relinearize = false;
     for (Key var : *clique->conditional()) {
@@ -260,11 +258,10 @@ struct GTSAM_EXPORT UpdateImpl {
 
       // Verify the threshold vector matches the actual variable size
       if (threshold.rows() != deltaVar.rows())
-        throw std::invalid_argument(
-            "Relinearization threshold vector dimensionality for '" +
-            std::string(1, Symbol(var).chr()) +
-            "' passed into iSAM2 parameters does not match actual variable "
-            "dimensionality.");
+        throw std::invalid_argument("Relinearization threshold vector dimensionality for '" +
+                                    std::string(1, Symbol(var).chr()) +
+                                    "' passed into iSAM2 parameters does not match actual variable "
+                                    "dimensionality.");
 
       // Check for relinearization
       if ((deltaVar.array().abs() > threshold.array()).any()) {
@@ -281,9 +278,10 @@ struct GTSAM_EXPORT UpdateImpl {
     }
   }
 
-  static void CheckRelinearizationRecursiveDouble(
-      double threshold, const VectorValues& delta,
-      const ISAM2::sharedClique& clique, KeySet* relinKeys) {
+  static void CheckRelinearizationRecursiveDouble(double threshold,
+                                                  const VectorValues& delta,
+                                                  const ISAM2::sharedClique& clique,
+                                                  KeySet* relinKeys) {
     // Check the current clique for relinearization
     bool relinearize = false;
     for (Key var : *clique->conditional()) {
@@ -316,7 +314,8 @@ struct GTSAM_EXPORT UpdateImpl {
    * than or equal to relinearizeThreshold
    */
   static KeySet CheckRelinearizationPartial(
-      const ISAM2::Roots& roots, const VectorValues& delta,
+      const ISAM2::Roots& roots,
+      const VectorValues& delta,
       const ISAM2Params::RelinearizationThreshold& relinearizeThreshold) {
     KeySet relinKeys;
     for (const ISAM2::sharedClique& root : roots) {
@@ -325,8 +324,7 @@ struct GTSAM_EXPORT UpdateImpl {
             boost::get<double>(relinearizeThreshold), delta, root, &relinKeys);
       else if (relinearizeThreshold.type() == typeid(FastMap<char, Vector>))
         CheckRelinearizationRecursiveMap(
-            boost::get<FastMap<char, Vector> >(relinearizeThreshold), delta,
-            root, &relinKeys);
+            boost::get<FastMap<char, Vector> >(relinearizeThreshold), delta, root, &relinKeys);
     }
     return relinKeys;
   }
@@ -350,13 +348,38 @@ struct GTSAM_EXPORT UpdateImpl {
     if (const double* threshold = boost::get<double>(&relinearizeThreshold)) {
       for (const VectorValues::KeyValuePair& key_delta : delta) {
         double maxDelta = key_delta.second.lpNorm<Eigen::Infinity>();
-        if (maxDelta >= *threshold) relinKeys.insert(key_delta.first);
+        gtsam::Symbol symbol(key_delta.first);
+
+        // std::cout << "key_delta  " << symbol.chr() << symbol.index() << "  maxDelta = " <<
+        // maxDelta << std::endl;
+
+        if (maxDelta >= *threshold) {
+          relinKeys.insert(key_delta.first);
+          // std::cout << "key_delta  " << symbol.chr() << symbol.index() << std::endl;
+
+          // std::cout << "key_delta  " << symbol.chr() << symbol.index()
+          //           << "  maxDelta = " << maxDelta << std::endl;
+        }
+        // // std::cout << "value" << key_delta.second << std::endl;
+        // if (symbol.chr() == 'x') {
+        //   double rot_norm = key_delta.second.head<3>().norm();
+        //   double trans_norm = key_delta.second.tail<3>().norm();
+        //   // std::cout << "rot_norm: " << rot_norm << " trans_norm: " << trans_norm << std::endl;
+        //   if (rot_norm >= 0.02 && trans_norm >= 0.05) relinKeys.insert(key_delta.first);
+        // } else if (symbol.chr() == 'v') {
+        //   double vel_norm = key_delta.second.norm();
+        //   // std::cout << "vel_norm: " << key_delta.second.norm() << std::endl;
+        //   if (vel_norm >= 0.02) relinKeys.insert(key_delta.first);
+        // } else if (symbol.chr() == 'b') {
+        //   double bias_norm = key_delta.second.norm();
+        //   // std::cout << "bias_norm: " << key_delta.second.norm() << std::endl;
+        //   if (bias_norm >= 0.1) relinKeys.insert(key_delta.first);
+        // }
       }
     } else if (const FastMap<char, Vector>* thresholds =
                    boost::get<FastMap<char, Vector> >(&relinearizeThreshold)) {
       for (const VectorValues::KeyValuePair& key_delta : delta) {
-        const Vector& threshold =
-            thresholds->find(Symbol(key_delta.first).chr())->second;
+        const Vector& threshold = thresholds->find(Symbol(key_delta.first).chr())->second;
         if (threshold.rows() != key_delta.second.rows())
           throw std::invalid_argument(
               "Relinearization threshold vector dimensionality for '" +
@@ -378,11 +401,9 @@ struct GTSAM_EXPORT UpdateImpl {
                                KeySet* markedKeys) const {
     gttic(gatherRelinearizeKeys);
     // J=\{\Delta_{j}\in\Delta|\Delta_{j}\geq\beta\}.
-    KeySet relinKeys =
-        params_.enablePartialRelinearizationCheck
-            ? CheckRelinearizationPartial(roots, delta,
-                                          params_.relinearizeThreshold)
-            : CheckRelinearizationFull(delta, params_.relinearizeThreshold);
+    KeySet relinKeys = params_.enablePartialRelinearizationCheck
+                           ? CheckRelinearizationPartial(roots, delta, params_.relinearizeThreshold)
+                           : CheckRelinearizationFull(delta, params_.relinearizeThreshold);
     if (updateParams_.forceFullSolve)
       relinKeys = CheckRelinearizationFull(delta, 0.0);  // for debugging
 
@@ -414,7 +435,8 @@ struct GTSAM_EXPORT UpdateImpl {
 
   // Mark all cliques that involve marked variables \Theta_{J} and all
   // their ancestors.
-  void findFluid(const ISAM2::Roots& roots, const KeySet& relinKeys,
+  void findFluid(const ISAM2::Roots& roots,
+                 const KeySet& relinKeys,
                  KeySet* markedKeys,
                  ISAM2Result::DetailedResults* detail) const {
     gttic(findFluid);
@@ -425,8 +447,7 @@ struct GTSAM_EXPORT UpdateImpl {
     // Relinearization-involved keys for detailed results
     if (detail && params_.enableDetailedResults) {
       KeySet involvedRelinKeys;
-      for (const auto& root : roots)
-        root->findAll(relinKeys, &involvedRelinKeys);
+      for (const auto& root : roots) root->findAll(relinKeys, &involvedRelinKeys);
       for (Key key : involvedRelinKeys) {
         if (!detail->variableStatus[key].isAboveRelinThreshold) {
           detail->variableStatus[key].isRelinearizeInvolved = true;
@@ -438,7 +459,8 @@ struct GTSAM_EXPORT UpdateImpl {
 
   // Linearize new factors
   void linearizeNewFactors(const NonlinearFactorGraph& newFactors,
-                           const Values& theta, size_t numNonlinearFactors,
+                           const Values& theta,
+                           size_t numNonlinearFactors,
                            const FactorIndices& newFactorsIndices,
                            GaussianFactorGraph* linearFactors) const {
     gttic(linearizeNewFactors);
@@ -502,8 +524,7 @@ struct GTSAM_EXPORT UpdateImpl {
 
   // find intermediate (linearized) factors from cache that are passed into
   // the affected area
-  static GaussianFactorGraph GetCachedBoundaryFactors(
-      const ISAM2::Cliques& orphans) {
+  static GaussianFactorGraph GetCachedBoundaryFactors(const ISAM2::Cliques& orphans) {
     GaussianFactorGraph cachedBoundary;
 
     for (const auto& orphan : orphans) {

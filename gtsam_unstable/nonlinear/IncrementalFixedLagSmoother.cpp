@@ -85,14 +85,13 @@ FixedLagSmoother::Result IncrementalFixedLagSmoother::update(const NonlinearFact
   KeyVector marginalizableKeys = findKeysBefore(current_timestamp - smootherLag_);
   marginalizableKeys_ = marginalizableKeys;
 
-  // if (debug)
-  // {
-  std::cout << "Marginalizable Keys: ";
-  for (Key key : marginalizableKeys) {
-    std::cout << DefaultKeyFormatter(key) << " ";
+  if (debug) {
+    std::cout << "Marginalizable Keys: ";
+    for (Key key : marginalizableKeys) {
+      std::cout << DefaultKeyFormatter(key) << " ";
+    }
+    std::cout << std::endl;
   }
-  std::cout << std::endl;
-  // }
 
   // Force iSAM2 to put the marginalizable variables at the beginning
   createOrderingConstraints(marginalizableKeys, constrainedKeys);
@@ -128,8 +127,8 @@ FixedLagSmoother::Result IncrementalFixedLagSmoother::update(const NonlinearFact
   // Values dummy_v;
   // KeyList dummy_additionalMarkedKeys;
   // isam_.update(dummy_f, dummy_v, factorsToRemove, constrainedKeys, boost::none,
-  // dummy_additionalMarkedKeys); 
-  //PrintSymbolicTree(isam_, "Final Bayes Tree2:");
+  // dummy_additionalMarkedKeys);
+  // PrintSymbolicTree(isam_, "Final Bayes Tree2:");
 
   // isam_.update(dummy_f, dummy_v, factorsToRemove, constrainedKeys, boost::none,
   // additionalMarkedKeys);

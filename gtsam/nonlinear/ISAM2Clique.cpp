@@ -39,17 +39,15 @@ void ISAM2Clique::setEliminationResult(
   gradientContribution_.resize(conditional_->cols() - 1);
   // Rewrite -(R * P')'*d   as   -(d' * R * P')'   for computational speed
   // reasons
-  gradientContribution_ << -conditional_->R().transpose() *
-                               conditional_->d(),
+  gradientContribution_ << -conditional_->R().transpose() * conditional_->d(),
       -conditional_->S().transpose() * conditional_->d();
 }
 
 /* ************************************************************************* */
 bool ISAM2Clique::equals(const This& other, double tol) const {
-  return Base::equals(other) &&
-         ((!cachedFactor_ && !other.cachedFactor_) ||
-          (cachedFactor_ && other.cachedFactor_ &&
-           cachedFactor_->equals(*other.cachedFactor_, tol)));
+  return Base::equals(other) && ((!cachedFactor_ && !other.cachedFactor_) ||
+                                 (cachedFactor_ && other.cachedFactor_ &&
+                                  cachedFactor_->equals(*other.cachedFactor_, tol)));
 }
 
 /* ************************************************************************* */
@@ -147,15 +145,14 @@ void ISAM2Clique::fastBackSubstitute(VectorValues* delta) const {
     const Vector solution = c.R().triangularView<Eigen::Upper>().solve(rhs);
 
     // Check for indeterminant solution
-    if (solution.hasNaN())
-      throw IndeterminantLinearSystemException(c.keys().front());
+    if (solution.hasNaN()) throw IndeterminantLinearSystemException(c.keys().front());
 
     // Insert solution into a VectorValues
     DenseIndex vectorPosition = 0;
     for (GaussianConditional::const_iterator frontal = c.beginFrontals();
-         frontal != c.endFrontals(); ++frontal) {
-      solnPointers_.at(*frontal)->second =
-          solution.segment(vectorPosition, c.getDim(frontal));
+         frontal != c.endFrontals();
+         ++frontal) {
+      solnPointers_.at(*frontal)->second = solution.segment(vectorPosition, c.getDim(frontal));
       vectorPosition += c.getDim(frontal);
     }
   } else {
@@ -187,8 +184,7 @@ void ISAM2Clique::markFrontalsAsChanged(KeySet* changed) const {
 }
 
 /* ************************************************************************* */
-void ISAM2Clique::restoreFromOriginals(const Vector& originalValues,
-                                       VectorValues* delta) const {
+void ISAM2Clique::restoreFromOriginals(const Vector& originalValues, VectorValues* delta) const {
   size_t pos = 0;
   for (Key frontal : conditional_->frontals()) {
     auto v = delta->at(frontal);
@@ -199,8 +195,10 @@ void ISAM2Clique::restoreFromOriginals(const Vector& originalValues,
 
 /* ************************************************************************* */
 // Note: not being used right now in favor of non-recursive version below.
-void ISAM2Clique::optimizeWildfire(const KeySet& replaced, double threshold,
-                                   KeySet* changed, VectorValues* delta,
+void ISAM2Clique::optimizeWildfire(const KeySet& replaced,
+                                   double threshold,
+                                   KeySet* changed,
+                                   VectorValues* delta,
                                    size_t* count) const {
   if (isDirty(replaced, *changed)) {
     // Temporary copy of the original values, to check how much they change
@@ -223,8 +221,10 @@ void ISAM2Clique::optimizeWildfire(const KeySet& replaced, double threshold,
   }
 }
 
-size_t optimizeWildfire(const ISAM2Clique::shared_ptr& root, double threshold,
-                        const KeySet& keys, VectorValues* delta) {
+size_t optimizeWildfire(const ISAM2Clique::shared_ptr& root,
+                        double threshold,
+                        const KeySet& keys,
+                        VectorValues* delta) {
   KeySet changed;
   size_t count = 0;
   // starting from the root, call optimize on each conditional
@@ -233,8 +233,10 @@ size_t optimizeWildfire(const ISAM2Clique::shared_ptr& root, double threshold,
 }
 
 /* ************************************************************************* */
-bool ISAM2Clique::optimizeWildfireNode(const KeySet& replaced, double threshold,
-                                       KeySet* changed, VectorValues* delta,
+bool ISAM2Clique::optimizeWildfireNode(const KeySet& replaced,
+                                       double threshold,
+                                       KeySet* changed,
+                                       VectorValues* delta,
                                        size_t* count) const {
   // TODO(gareth): This code shares a lot of logic w/ linearAlgorithms-inst,
   // potentially refactor
@@ -258,7 +260,8 @@ bool ISAM2Clique::optimizeWildfireNode(const KeySet& replaced, double threshold,
 }
 
 size_t optimizeWildfireNonRecursive(const ISAM2Clique::shared_ptr& root,
-                                    double threshold, const KeySet& keys,
+                                    double threshold,
+                                    const KeySet& keys,
                                     VectorValues* delta) {
   KeySet changed;
   size_t count = 0;
@@ -270,8 +273,8 @@ size_t optimizeWildfireNonRecursive(const ISAM2Clique::shared_ptr& root,
     while (!travStack.empty()) {
       currentNode = travStack.top();
       travStack.pop();
-      bool dirty = currentNode->optimizeWildfireNode(keys, threshold, &changed,
-                                                     delta, &count);
+      bool dirty = currentNode->optimizeWildfireNode(keys, threshold, &changed, delta, &count);
+
       if (dirty) {
         for (const auto& child : currentNode->children) {
           travStack.push(child);
