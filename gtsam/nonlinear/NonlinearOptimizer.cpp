@@ -196,7 +196,7 @@ bool checkConvergence(double relativeErrorTreshold, double absoluteErrorTreshold
     return true;
 
   // check if diverges
-  double absoluteDecrease = currentError - newError;
+  double absoluteDecrease = std::abs(currentError - newError);
   if (verbosity >= NonlinearOptimizerParams::ERROR) {
     if (absoluteDecrease <= absoluteErrorTreshold)
       cout << "absoluteDecrease: " << setprecision(12) << absoluteDecrease << " < "

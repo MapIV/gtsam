@@ -189,7 +189,7 @@ bool LevenbergMarquardtOptimizer::tryLambda(const GaussianFactorGraph& linear,
              << ")" << endl;
 
       // cost change in the original, nonlinear system (old - new)
-      costChange = currentState->error - newError;
+      costChange = std::abs(currentState->error - newError);
 
       if (linearizedCostChange > std::numeric_limits<double>::epsilon() * oldLinearizedError) {
         // the (linear) error has to decrease to satisfy this condition
